@@ -15,11 +15,9 @@ int main()
 	Renderer.Rendering(TEXT(
 						   R"(
 \begin{align}
-Base Line 我们构造一个蒙特卡洛积分（Monte\quad Carlo\quad Integration）： \\
-F_{N}=\frac{b-a}{N}\sum^{N}_{i=1}f(X_{i}) \\
-其中地每一个 X_{i}(i=1,2,3,...,N) 为 [a,b] 之间的均匀连续随机变量。\\
-其实 F_{N} 的数学期望即为积分结果 \Alpha E[F_{N}]=E[\frac{b-a}{N}\sum^{N}_{i=1}f(X_{i})] \\
-所以有了 \int_{D}f(x)dx=\lim_{N\to\inf}\frac{1}{N}\sum^{N}_{i=1}\frac{f(X_{i})}{p(X_{i})}
+\int \frac{dx}{\sqrt{x^{2} \pm a^{2}}} = ln(x+\sqrt{x^{2}\pm a^{2}})+C \\
+\lim_{x\to\infity} (1+\frac{1}{x})^{x}=e \\
+f(t)=A_{0}+\sum^{\infity}_{n=1}A_{n} sin(na\Lambda+\phi_{n}), b_{n}=A_{n}cos\phi, a\Lambda=x
 \end{align}
 )"),
 					   40, 40);

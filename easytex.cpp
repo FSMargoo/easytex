@@ -266,7 +266,7 @@ int TexRender::RenderingTex(const TexString &TeXString, size_t X, size_t Y, IMAG
 
 			if (*Character == TEXT('^'))
 			{
-				TextHeight = TextHeight * 0.7;
+				TextHeight = TextHeight * 0.6;
 
 				if (InPrint)
 				{
@@ -435,8 +435,6 @@ int TexRender::RenderingTex(const TexString &TeXString, size_t X, size_t Y, IMAG
 						Outtext(X, Y, TEXT("lim"), MurseOnly);
 						X += textwidth(TEXT("lim"));
 					}
-
-					X += 5;
 
 					continue;
 				}
@@ -973,7 +971,7 @@ int TexRender::RenderingTex(const TexString &TeXString, size_t X, size_t Y, IMAG
 					X += textwidth(*Character) + WordSpacing + TextHeight * 0.4;
 				}
 				else if (*Character == TEXT('+') || *Character == TEXT('-') || *Character == TEXT('*') ||
-						 *Character == TEXT('/') || *Character == TEXT('%') ||
+						 *Character == TEXT('/') || *Character == TEXT('%') || *Character == TEXT(')') ||
 						 *Character == TEXT('(') ||
 						 *Character == TEXT('[') ||
 						 *Character == TEXT(']'))
@@ -981,12 +979,6 @@ int TexRender::RenderingTex(const TexString &TeXString, size_t X, size_t Y, IMAG
 					Outtext(X + 2, Y, *Character, MurseOnly);
 
 					X += textwidth(*Character) + WordSpacing + 4;
-				}
-				else if (*Character == TEXT(')'))
-				{
-					Outtext(X, Y, *Character, MurseOnly);
-
-					X += textwidth(*Character) + WordSpacing + 2;
 				}
 				else if (*Character == TEXT('.'))
 				{
