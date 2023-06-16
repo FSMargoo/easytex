@@ -2,50 +2,31 @@
 
 int main()
 {
-	initgraph(1920, 1080);
+	initgraph(640, 480);
 	setbkcolor(WHITE);
 	cleardevice();
 
 	BeginBatchDraw();
 
 	TexRender Renderer;
-	Renderer.TextHeight = 24;
+	Renderer.TextHeight	 = 24;
+	Renderer.LineSpacing = 2;
 
-	Renderer.Rendering(
-		TEXT(
-			R"(若 $\int_{a}^{b}f(x)d(x).x = \frac{-b \pm \sqrt {b^2-4ac}}{2a}$，请在二维欧几里得空间 $\R^{2}$ 中求出一个满足的 $f(x)$
-补充背景：$c\in\R，a\in\R，b\in\R$
-显然，只有当 $b^{2}-4ac\lt0$ 时，该积分在 $\R^{2}$ 中存在，所以
-首先考虑考虑当 $\int_{a}^{b}f(x)d(x).x = \frac{-b + \sqrt {b^2-4ac}}{2a}$ 时考虑到 $[a, b]$ 为一定闭区间，采用 $Riemann$ $integral$ 的定义，故设 $f$ 为在闭区间 $[a, b]$ 有定义的实值函数 $f$，令此时其黎曼和为 $\Alpha$ 则有
-$\Alpha=\sum^{n-1}_{i=1}f(t_{i})(x_{i+1}-x_{i})=\lim{\N\to\inf}\int^{a}_{b}f_{\N}dx$，我们不妨将原式变形：$\int_{a}^{b}f(x)dx = \frac{-b + \sqrt {b^2-4ac}}{2a}=-\frac{b}{2a} + \frac{\sqrt {b^2-4ac}}{2a}$，令 $a=1, b=0, c=-1$，
-发现此时 $$
+	Renderer.Rendering(TEXT(
+						   R"(
+\begin{align}
+Base Line 我们构造一个蒙特卡洛积分（Monte\quard Carlo\quard Integration）： \\
+F_{N}=\frac{b-a}{N}\sum^{N}_{i=1}f(X_{i}) \\
+其中地每一个 X_{i}(i=1,2,3,...,N) 为 [a,b] 之间的均匀连续随机变量。\\
+其实 F_{N} 的数学期望即为积分结果 \Alpha E[F_{N}]=E[\frac{b-a}{N}\sum^{N}_{i=1}f(X_{i})] \\
+所以有了 \int_{D}f(x)dx=\lim_{N\to\inf}\frac{1}{N}\sum^{N}_{i=1}\frac{f(X_{i})}{p(X_{i})}
+\end{align}
 )"),
-		/*
-		*
-		观察一个极限：$\lim{x\to0}\frac{sinx}{x}=1$
-		对于任意 $\lim{x\to\infity}\frac{sin\Delta}{\Delta}$ 且 $\lim{}\Delta\eq0$ 的形式，其极限都为 1$
-		$F:X\rightarrow Y (X\in R)$
-		For every integer $n \geq 1$, let $H$ be an arbitrary ($2^{n-1}+1$) vertex induced subgraph of $Q^{n}$, then
-		$\Delta(H) \geq \sqrt{n}$ 欧拉公式：$e^{i\pi}+1=0$
-		$\int kdx=kx+C$
-		$\int \frac{1}{\sqrt{x}}dx=2\sqrt{x}+C$
-		$g(xy)=g(x)\cdot f(xy)+g(x)^{2}$ ($x\in \R$)
-		${Z_{i}\in\C}_{i\in\N} Z\in\C$
-		$\lim{i\to\infity}Z_{i}=Z$
-		$z=re^{i\phi}, -\pi\ge\phi\geq\pi$
-		*/
-		20, 20);
+					   40, 40);
 
-	saveimage(TEXT("./demo.png"));
+	FlushBatchDraw();
 
-	while (true)
-	{
-		FlushBatchDraw();
-
-		Sleep(8);
-	}
-
-	EndBatchDraw();
+	getmessage(EM_CHAR);
 
 	return 0;
 }

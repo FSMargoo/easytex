@@ -105,7 +105,7 @@ TexRender::TexRender()
 	WordSpacing	  = 0;
 	LineSpacing	  = 0;
 	TextColor	  = BLACK;
-	InTeX		  = false;
+	InTeX		  = true;
 	DisableItalic = false;
 }
 void TexRender::Outtext(const size_t &X, const size_t &Y, const TCHAR *String, bool MurseOnly)
@@ -124,14 +124,14 @@ void TexRender::Outtext(const size_t &X, const size_t &Y, const TCHAR &Character
 }
 void TexRender::ResetRenderer()
 {
-	InTeX = false;
+	InTeX = true;
 }
 int TexRender::ScanLine(TexString::const_iterator Character, const TexString::const_iterator End)
 {
 	TexString String;
 	for (; Character != End; ++Character)
 	{
-		if (*Character == TEXT('\n'))
+		if (*Character == TEXT('\\') && *(Character + 1) == TEXT('\\'))
 		{
 			break;
 		}
@@ -181,7 +181,7 @@ int TexRender::RenderingTex(const TexString &TeXString, size_t X, size_t Y, IMAG
 	SetWorkingImage(TargetDevice);
 
 	TexFont OldFont;
-	TexFont ChineseFont(TextHeight, TextColor, this->ChineseFont);
+	TexFont ChineseFont(TextHeight * 0.8, TextColor, this->ChineseFont);
 	TexFont EnglishFont(TextHeight, TextColor, this->EnglishFont);
 	TexFont MathFont(TextHeight, TextColor, this->EnglishFont);
 
@@ -193,6 +193,7 @@ int TexRender::RenderingTex(const TexString &TeXString, size_t X, size_t Y, IMAG
 	wchar_t LastChar   = 0;
 	int		BaseX	   = X;
 	int		LineHeight = TextHeight;
+	bool	InAlign	   = false;
 	bool	InPrint	   = false;
 	int		LineTop	   = 0;
 
@@ -223,23 +224,15 @@ int TexRender::RenderingTex(const TexString &TeXString, size_t X, size_t Y, IMAG
 			}
 		} while (0);
 
-		if (*Character == TEXT('$'))
-		{
-			InTeX = !InTeX;
-
-			InPrint = false;
-
-			continue;
-		}
-
-		if (*Character == TEXT('\n'))
+		if (*Character == TEXT('\\') && *(Character + 1) == TEXT('\\'))
 		{
 			X = BaseX;
 			Y += LineHeight + ScanLine(Character + 1, TeXString.end()) + LineSpacing;
 			SuperscriptLine = Y - TextHeight * 0.2;
 			LineTop			= 0;
-			InTeX			= false;
 			LineHeight		= TextHeight;
+
+			++Character;
 
 			continue;
 		}
@@ -278,6 +271,8 @@ int TexRender::RenderingTex(const TexString &TeXString, size_t X, size_t Y, IMAG
 				TextHeight = TextHeightBackup;
 
 				LineTop = min(LineTop, -TextHeight * 0.3);
+
+				X += 2;
 
 				continue;
 			}
@@ -333,6 +328,8 @@ int TexRender::RenderingTex(const TexString &TeXString, size_t X, size_t Y, IMAG
 
 				TextHeight = TextHeightBackup;
 
+				X += 2;
+
 				continue;
 			}
 			else if (*Character == TEXT('\\'))
@@ -364,15 +361,32 @@ int TexRender::RenderingTex(const TexString &TeXString, size_t X, size_t Y, IMAG
 						line(X, Y + TextHeight / 2, X + Width, Y + TextHeight / 2);
 					}
 
-					X += Width + 5;
+					X += Width + 10;
 
-					LineTop	   = min(LineTop, -TextHeight * 0.75 + TopTop);
-					LineHeight = max(LineHeight, TextHeight - BottomTop);
+					LineTop	   = min(LineTop, -TextHeight * 0.25 + TopTop);
+					LineHeight = max(LineHeight, TextHeight + TextHeight / 2 - BottomTop);
 
 					continue;
 				}
+				if (Function == TEXT("begin"))
+				{
+					TexString Parameter = FetchAgrument(Character);
+					if (Parameter == TEXT("align"))
+					{
+						InAlign = true;
+					}
+				}
+				if (Function == TEXT("end"))
+				{
+					TexString Parameter = FetchAgrument(Character);
+					if (Parameter == TEXT("align"))
+					{
+						InAlign = false;
+					}
+				}
 				if (Function == TEXT("lim"))
 				{
+					++Character;
 					TexString Appoarch = FetchAgrument(Character);
 
 					if (!Appoarch.empty())
@@ -411,6 +425,8 @@ int TexRender::RenderingTex(const TexString &TeXString, size_t X, size_t Y, IMAG
 						Outtext(X, Y, TEXT("lim"), MurseOnly);
 						X += textwidth(TEXT("lim"));
 					}
+
+					X += 5;
 
 					continue;
 				}
@@ -493,7 +509,17 @@ int TexRender::RenderingTex(const TexString &TeXString, size_t X, size_t Y, IMAG
 
 					OldFont.SelectToDevice();
 
+					X += 2;
+
 					continue;
+				}
+				if (Function == TEXT("qquad"))
+				{
+					TEX_OUT_GREEK('  ');
+				}
+				if (Function == TEXT("quad"))
+				{
+					TEX_OUT_GREEK(' ');
 				}
 				if (Function == TEXT("alpha"))
 				{
@@ -934,6 +960,13 @@ int TexRender::RenderingTex(const TexString &TeXString, size_t X, size_t Y, IMAG
 					X += 3;
 				}
 				if (*Character == TEXT('='))
+				{
+					Outtext(X + TextHeight * 0.2, Y, *Character, MurseOnly);
+
+					X += textwidth(*Character) + WordSpacing + TextHeight * 0.4;
+				}
+				else if (*Character == TEXT('(') || *Character == TEXT(')') || *Character == TEXT('[') ||
+						 *Character == TEXT(']'))
 				{
 					Outtext(X + 2, Y, *Character, MurseOnly);
 

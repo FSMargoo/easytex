@@ -26,48 +26,47 @@ easytex.h
 ```C++
 #include "../easytex.h"
 
-int main() {
-    // 开启一个 EasyX 窗口
-    initgraph(640, 480);
-    // 设置背景色
-    setbkcolor(WHITE);
-    cleardevice();
+int main()
+{
+	initgraph(640, 480);
+	setbkcolor(WHITE);
+	cleardevice();
 
-    BeginBatchDraw();
+	BeginBatchDraw();
 
-    // 定义一个 EasyTex 渲染器
-    TexRender Renderer;
-    // 设置字体高度
-    Renderer.TextHeight = 24;
-    // 设置行间距
-    Renderer.LineSpacing = 4;
-    // 渲染 LaTeX 内容 
-    Renderer.Rendering(TEXT(R"(观察一个极限：$lim_{x\rightarrow0}\frac{sinx}{x}=1$
-对于任意 $lim_{x\rightarrow\infity}\frac{sin\Delta}{\Delta}$ 且 $lim\Delta\eq0$ 的形式，其极限都为 1$
-$F:X\rightarrow Y (X\in R)$
-For every integer $n \geq 1$, let $H$ be an arbitrary ($2^{n-1}+1$) vertex induced
-subgraph of $Q^{n}$, then $\Delta(H) \geq \sqrt{n}$
-)"), 40, 40);
+	TexRender Renderer;
+	Renderer.TextHeight = 24;
+	Renderer.LineSpacing = 2;
 
-    FlushBatchDraw();
+	Renderer.Rendering(
+		TEXT(
+			R"(
+\begin{align}
+Base Line 我们构造一个蒙特卡洛积分（Monte\quard Carlo\quard Integration）： \\
+F_{N}=\frac{b-a}{N}\sum^{N}_{i=1}f(X_{i}) \\
+其中地每一个 X_{i}(i=1,2,3,...,N) 为 [a,b] 之间的均匀连续随机变量。\\
+其实 F_{N} 的数学期望即为积分结果 \Alpha E[F_{N}]=E[\frac{b-a}{N}\sum^{N}_{i=1}f(X_{i})] \\
+所以有了 \int_{D}f(x)dx=\lim_{N\to\inf}\frac{1}{N}\sum^{N}_{i=1}\frac{f(X_{i})}{p(X_{i})}
+\end{align}
+)"),
+		40, 40);
 
-    saveimage(TEXT("./demo.png"));
+	FlushBatchDraw();
 
-    while (true)
-    {
-        FlushBatchDraw();
+	getmessage(EM_CHAR);
 
-        Sleep(8);
-    }
+	return 0;
+}ep(8);
+	}
 
-    EndBatchDraw();
+	EndBatchDraw();
 
-    return 0;
+	return 0;
 }
 ```
 
 运行后，会有如下效果：
 
 <div align="center">
-<image src="./Readme-Src/demo.png">
+<image src="./Readme-Src/capture.png">
 </div>
