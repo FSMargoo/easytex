@@ -368,21 +368,66 @@ int TexRender::RenderingTex(const TexString &TeXString, size_t X, size_t Y, IMAG
 
 					continue;
 				}
+				if (Function == TEXT("lim"))
+				{
+					TexString Appoarch = FetchAgrument(Character);
+
+					if (!Appoarch.empty())
+					{
+						TextHeight *= 0.8;
+
+						int Width	 = RenderingTex(Appoarch, X, Y, TargetDevice, true) - X;
+						int LimWidth = textwidth(TEXT("lim"));
+
+						TextHeight = TextHeightBackup;
+
+						if (Width <= LimWidth)
+						{
+							Outtext(X, Y - TextHeight * 0.1, TEXT("lim"), MurseOnly);
+
+							TextHeight *= 0.8;
+
+							RenderingTex(Appoarch, X + LimWidth / 2 - Width / 2, Y + TextHeight * 0.85, TargetDevice,
+										 MurseOnly);
+						}
+						else
+						{
+							Outtext(X + Width / 2 - LimWidth / 2, Y - TextHeight * 0.1, TEXT("lim"), MurseOnly);
+
+							TextHeight *= 0.8;
+
+							RenderingTex(Appoarch, X, Y + TextHeight * 0.85, TargetDevice, MurseOnly);
+						}
+						TextHeight = TextHeightBackup;
+
+						LineHeight = max(LineHeight, TextHeight + TextHeight * 0.15);
+						X += max(textwidth(TEXT("lim")), Width) + 2;
+					}
+					else
+					{
+						Outtext(X, Y, TEXT("lim"), MurseOnly);
+						X += textwidth(TEXT("lim"));
+					}
+
+					continue;
+				}
 				if (Function == TEXT("sqrt"))
 				{
 					TexString Agrument = FetchAgrument(Character);
 					int		  SqrtX	   = X;
-					int		  Width	   = RenderingTex(Agrument, X, Y, TargetDevice, true) - X;
 					int		  Top	   = 0;
+					int		  Width	   = RenderingTex(Agrument, X, Y, TargetDevice, true, &Top) - X;
 
-					X += textwidth(TEXT('√')) + 4;
+					X += textwidth(TEXT('√')) + 1;
 
 					RenderingTex(Agrument, X, Y, TargetDevice, MurseOnly, &Top);
 
 					if (!MurseOnly)
 					{
-						TexPainter::DrawSqrt(SqrtX, Y + Top, Width + textwidth(TEXT('√')) + 4, TextHeight - Top + 2);
+						TexPainter::DrawSqrt(SqrtX, Y + Top + 2, Width + textwidth(TEXT('√')) + 2, TextHeight - Top);
 					}
+
+					LineTop = min(LineTop, -TextHeight * 0.2);
 
 					X += Width + 2;
 				}
@@ -610,7 +655,7 @@ int TexRender::RenderingTex(const TexString &TeXString, size_t X, size_t Y, IMAG
 				{
 					TEX_OUT_GREEK('↓');
 				}
-				if (Function == TEXT("rightarrow"))
+				if (Function == TEXT("rightarrow") || Function == TEXT("to") || Function == TEXT("apporch"))
 				{
 					TEX_OUT_GREEK('→');
 				}
@@ -670,6 +715,10 @@ int TexRender::RenderingTex(const TexString &TeXString, size_t X, size_t Y, IMAG
 				{
 					TEX_OUT_GREEK('⊇');
 				}
+				if (Function == TEXT("cdot"))
+				{
+					TEX_OUT_GREEK('·');
+				}
 				if (Function == TEXT("infity"))
 				{
 					TEX_OUT_GREEK('∞');
@@ -682,9 +731,112 @@ int TexRender::RenderingTex(const TexString &TeXString, size_t X, size_t Y, IMAG
 
 					Outtext(X, Y - TextHeight * 0.2, TEXT('∫'), MurseOnly);
 
-					X += textwidth(TEXT('∫')) + WordSpacing;
+					X += textwidth(TEXT('∫')) + WordSpacing + 2;
 
 					LastChar = TEXT('∫');
+
+					--Character;
+
+					InPrint = false;
+
+					OldFont.SelectToDevice();
+
+					LineTop = min(LineTop, -TextHeight * 0.4);
+
+					continue;
+				}
+				if (Function == TEXT("R"))
+				{
+					TexFont OldFont;
+					TexFont SymbolFont(TextHeight, BLACK, TEXT("Times New Roman"));
+					SymbolFont.SelectToDevice();
+
+					Outtext(X, Y, TEXT('ℝ'), MurseOnly);
+
+					X += textwidth(TEXT('ℝ')) + WordSpacing;
+
+					LastChar = TEXT('ℝ');
+
+					--Character;
+
+					InPrint = false;
+
+					OldFont.SelectToDevice();
+
+					continue;
+				}
+				if (Function == TEXT("Z"))
+				{
+					TexFont OldFont;
+					TexFont SymbolFont(TextHeight, BLACK, TEXT("Times New Roman"));
+					SymbolFont.SelectToDevice();
+
+					Outtext(X, Y, TEXT('ℤ'), MurseOnly);
+
+					X += textwidth(TEXT('ℤ')) + WordSpacing;
+
+					LastChar = TEXT('ℤ');
+
+					--Character;
+
+					InPrint = false;
+
+					OldFont.SelectToDevice();
+
+					continue;
+				}
+				if (Function == TEXT("Q"))
+				{
+					TexFont OldFont;
+					TexFont SymbolFont(TextHeight, BLACK, TEXT("Times New Roman"));
+					SymbolFont.SelectToDevice();
+
+					Outtext(X, Y, TEXT('ℚ'), MurseOnly);
+
+					X += textwidth(TEXT('ℚ')) + WordSpacing;
+
+					LastChar = TEXT('ℚ');
+
+					--Character;
+
+					InPrint = false;
+
+					OldFont.SelectToDevice();
+
+					continue;
+				}
+				if (Function == TEXT("C"))
+				{
+					TexFont OldFont;
+					TexFont SymbolFont(TextHeight, BLACK, TEXT("Times New Roman"));
+					SymbolFont.SelectToDevice();
+
+					Outtext(X, Y, TEXT('ℂ'), MurseOnly);
+					Outtext(X + 1, Y, TEXT('ℂ'), MurseOnly);
+
+					X += textwidth(TEXT('ℂ')) + WordSpacing;
+
+					LastChar = TEXT('ℂ');
+
+					--Character;
+
+					InPrint = false;
+
+					OldFont.SelectToDevice();
+
+					continue;
+				}
+				if (Function == TEXT("N"))
+				{
+					TexFont OldFont;
+					TexFont SymbolFont(TextHeight, BLACK, TEXT("Times New Roman"));
+					SymbolFont.SelectToDevice();
+
+					Outtext(X, Y, TEXT('ℕ'), MurseOnly);
+
+					X += textwidth(TEXT('ℕ')) + WordSpacing;
+
+					LastChar = TEXT('ℕ');
 
 					--Character;
 
