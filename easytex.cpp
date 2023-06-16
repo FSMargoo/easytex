@@ -414,22 +414,61 @@ int TexRender::RenderingTex(const TexString &TeXString, size_t X, size_t Y, IMAG
 				if (Function == TEXT("sqrt"))
 				{
 					TexString Agrument = FetchAgrument(Character);
-					int		  SqrtX	   = X;
-					int		  Top	   = 0;
-					int		  Width	   = RenderingTex(Agrument, X, Y, TargetDevice, true, &Top) - X;
 
-					X += textwidth(TEXT('√')) + 1;
-
-					RenderingTex(Agrument, X, Y, TargetDevice, MurseOnly, &Top);
-
-					if (!MurseOnly)
+					if (Character + 1 == TeXString.end())
 					{
-						TexPainter::DrawSqrt(SqrtX, Y + Top + 2, Width + textwidth(TEXT('√')) + 2, TextHeight - Top);
+						goto RenderNormaly;
 					}
+					if (*(Character + 1) != TEXT('{'))
+					{
+					RenderNormaly:
+						int SqrtX = X;
+						int Top	  = 0;
+						int Width = RenderingTex(Agrument, X, Y, TargetDevice, true, &Top) - X;
 
-					LineTop = min(LineTop, -TextHeight * 0.2);
+						X += textwidth(TEXT('√')) + 1;
 
-					X += Width + 2;
+						RenderingTex(Agrument, X, Y, TargetDevice, MurseOnly, &Top);
+
+						if (!MurseOnly)
+						{
+							TexPainter::DrawSqrt(SqrtX, Y + Top + 2, Width + textwidth(TEXT('√')) + 2,
+												 TextHeight - Top);
+						}
+
+						LineTop = min(LineTop, -TextHeight * 0.2);
+
+						X += Width + 2;
+					}
+					else
+					{
+						++Character;
+						TexString TeXString = FetchAgrument(Character);
+
+						TextHeight *= 0.6;
+
+						RenderingTex(Agrument, X, Y, TargetDevice, MurseOnly) - X;
+
+						TextHeight = TextHeightBackup;
+
+						int SqrtX = X;
+						int Top	  = 0;
+						int Width = RenderingTex(TeXString, X, Y, TargetDevice, true, &Top) - X;
+
+						X += textwidth(TEXT('√')) + 1;
+
+						RenderingTex(TeXString, X, Y, TargetDevice, MurseOnly, &Top);
+
+						if (!MurseOnly)
+						{
+							TexPainter::DrawSqrt(SqrtX, Y + Top + 2, Width + textwidth(TEXT('√')) + 2,
+												 TextHeight - Top);
+						}
+
+						LineTop = min(LineTop, -TextHeight * 0.2);
+
+						X += Width + 2;
+					}
 				}
 				if (Function == TEXT("sum"))
 				{
