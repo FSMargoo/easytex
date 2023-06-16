@@ -763,7 +763,7 @@ int TexRender::RenderingTex(const TexString &TeXString, size_t X, size_t Y, IMAG
 				{
 					TEX_OUT_GREEK('·');
 				}
-				if (Function == TEXT("infity"))
+				if (Function == TEXT("infity") || Function == TEXT("inf"))
 				{
 					TEX_OUT_GREEK('∞');
 				}
@@ -923,6 +923,10 @@ int TexRender::RenderingTex(const TexString &TeXString, size_t X, size_t Y, IMAG
 
 					X += textwidth(*Character) + WordSpacing + 7;
 
+					LastChar = *Character;
+
+					InPrint = false;
+
 					continue;
 				}
 				if (InPrint)
@@ -930,6 +934,12 @@ int TexRender::RenderingTex(const TexString &TeXString, size_t X, size_t Y, IMAG
 					X += 3;
 				}
 				if (*Character == TEXT('='))
+				{
+					Outtext(X + 2, Y, *Character, MurseOnly);
+
+					X += textwidth(*Character) + WordSpacing + 4;
+				}
+				else if (*Character == TEXT('.'))
 				{
 					Outtext(X + 4, Y, *Character, MurseOnly);
 
