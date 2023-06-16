@@ -193,16 +193,26 @@ int TexRender::RenderingTex(const TexString &TeXString, size_t X, size_t Y, IMAG
 	wchar_t LastChar   = 0;
 	int		BaseX	   = X;
 	int		LineHeight = TextHeight;
+	bool	Start	   = true;
 	bool	InAlign	   = false;
 	bool	InPrint	   = false;
 	int		LineTop	   = 0;
 
 	for (auto Character = TeXString.begin(); Character != TeXString.end(); ++Character)
 	{
+		if (*Character == TEXT(' '))
+		{
+			continue;
+		}
+
 		do
 		{
 			if (TexHelper::IsEnglishCharacter(*Character))
 			{
+				if (!TexHelper::IsEnglishCharacter(LastChar) && !Start)
+				{
+					X += 4;
+				}
 				if (TexHelper::IsGreek(*Character))
 				{
 					EnglishFont.SelectToDevice();
@@ -220,9 +230,16 @@ int TexRender::RenderingTex(const TexString &TeXString, size_t X, size_t Y, IMAG
 			}
 			else
 			{
+				if (TexHelper::IsEnglishCharacter(LastChar) && !Start)
+				{
+					X += 4;
+				}
+
 				ChineseFont.SelectToDevice();
 			}
 		} while (0);
+
+		Start = false;
 
 		if (*Character == TEXT('\\') && *(Character + 1) == TEXT('\\'))
 		{
@@ -231,6 +248,7 @@ int TexRender::RenderingTex(const TexString &TeXString, size_t X, size_t Y, IMAG
 			SuperscriptLine = Y - TextHeight * 0.2;
 			LineTop			= 0;
 			LineHeight		= TextHeight;
+			Start			= true;
 
 			++Character;
 
@@ -246,10 +264,6 @@ int TexRender::RenderingTex(const TexString &TeXString, size_t X, size_t Y, IMAG
 		{
 			int TextHeightBackup = TextHeight;
 
-			if (*Character == TEXT(' '))
-			{
-				continue;
-			}
 			if (*Character == TEXT('^'))
 			{
 				TextHeight = TextHeight * 0.7;
@@ -271,8 +285,6 @@ int TexRender::RenderingTex(const TexString &TeXString, size_t X, size_t Y, IMAG
 				TextHeight = TextHeightBackup;
 
 				LineTop = min(LineTop, -TextHeight * 0.3);
-
-				X += 2;
 
 				continue;
 			}
@@ -328,8 +340,6 @@ int TexRender::RenderingTex(const TexString &TeXString, size_t X, size_t Y, IMAG
 
 				TextHeight = TextHeightBackup;
 
-				X += 2;
-
 				continue;
 			}
 			else if (*Character == TEXT('\\'))
@@ -361,7 +371,7 @@ int TexRender::RenderingTex(const TexString &TeXString, size_t X, size_t Y, IMAG
 						line(X, Y + TextHeight / 2, X + Width, Y + TextHeight / 2);
 					}
 
-					X += Width + 10;
+					X += Width;
 
 					LineTop	   = min(LineTop, -TextHeight * 0.25 + TopTop);
 					LineHeight = max(LineHeight, TextHeight + TextHeight / 2 - BottomTop);
@@ -455,7 +465,7 @@ int TexRender::RenderingTex(const TexString &TeXString, size_t X, size_t Y, IMAG
 												 TextHeight - Top + 2);
 						}
 
-						LineTop = min(LineTop, -TextHeight * 0.2);
+						LineTop = min(LineTop, -TextHeight * 0.2 + Top);
 
 						X += Width + 2;
 					}
@@ -484,12 +494,10 @@ int TexRender::RenderingTex(const TexString &TeXString, size_t X, size_t Y, IMAG
 												 TextHeight - Top + 2);
 						}
 
-						LineTop = min(LineTop, -TextHeight * 0.2);
+						LineTop = min(LineTop, -TextHeight * 0.2 + Top);
 
 						X += Width + 2;
 					}
-
-					LineTop = min(LineTop, -6);
 				}
 				if (Function == TEXT("sum"))
 				{
@@ -825,11 +833,11 @@ int TexRender::RenderingTex(const TexString &TeXString, size_t X, size_t Y, IMAG
 					TexFont SymbolFont(TextHeight, BLACK, TEXT("Times New Roman"));
 					SymbolFont.SelectToDevice();
 
-					Outtext(X, Y, TEXT('ℝ'), MurseOnly);
+					Outtext(X, Y - TextHeight * 0.1, TEXT('ℝ'), MurseOnly);
 
 					X += textwidth(TEXT('ℝ')) + WordSpacing;
 
-					LastChar = TEXT('ℝ');
+					LastChar = TEXT('R');
 
 					--Character;
 
@@ -845,11 +853,11 @@ int TexRender::RenderingTex(const TexString &TeXString, size_t X, size_t Y, IMAG
 					TexFont SymbolFont(TextHeight, BLACK, TEXT("Times New Roman"));
 					SymbolFont.SelectToDevice();
 
-					Outtext(X, Y, TEXT('ℤ'), MurseOnly);
+					Outtext(X, Y - TextHeight * 0.1, TEXT('ℤ'), MurseOnly);
 
 					X += textwidth(TEXT('ℤ')) + WordSpacing;
 
-					LastChar = TEXT('ℤ');
+					LastChar = TEXT('Z');
 
 					--Character;
 
@@ -865,11 +873,11 @@ int TexRender::RenderingTex(const TexString &TeXString, size_t X, size_t Y, IMAG
 					TexFont SymbolFont(TextHeight, BLACK, TEXT("Times New Roman"));
 					SymbolFont.SelectToDevice();
 
-					Outtext(X, Y, TEXT('ℚ'), MurseOnly);
+					Outtext(X, Y - TextHeight * 0.1, TEXT('ℚ'), MurseOnly);
 
 					X += textwidth(TEXT('ℚ')) + WordSpacing;
 
-					LastChar = TEXT('ℚ');
+					LastChar = TEXT('Q');
 
 					--Character;
 
@@ -885,12 +893,11 @@ int TexRender::RenderingTex(const TexString &TeXString, size_t X, size_t Y, IMAG
 					TexFont SymbolFont(TextHeight, BLACK, TEXT("Times New Roman"));
 					SymbolFont.SelectToDevice();
 
-					Outtext(X, Y, TEXT('ℂ'), MurseOnly);
-					Outtext(X + 1, Y, TEXT('ℂ'), MurseOnly);
+					Outtext(X, Y - TextHeight * 0.1, TEXT('ℂ'), MurseOnly);
 
 					X += textwidth(TEXT('ℂ')) + WordSpacing;
 
-					LastChar = TEXT('ℂ');
+					LastChar = TEXT('C');
 
 					--Character;
 
@@ -906,11 +913,11 @@ int TexRender::RenderingTex(const TexString &TeXString, size_t X, size_t Y, IMAG
 					TexFont SymbolFont(TextHeight, BLACK, TEXT("Times New Roman"));
 					SymbolFont.SelectToDevice();
 
-					Outtext(X, Y, TEXT('ℕ'), MurseOnly);
+					Outtext(X, Y - TextHeight * 0.1, TEXT('ℕ'), MurseOnly);
 
 					X += textwidth(TEXT('ℕ')) + WordSpacing;
 
-					LastChar = TEXT('ℕ');
+					LastChar = TEXT('N');
 
 					--Character;
 
@@ -965,12 +972,21 @@ int TexRender::RenderingTex(const TexString &TeXString, size_t X, size_t Y, IMAG
 
 					X += textwidth(*Character) + WordSpacing + TextHeight * 0.4;
 				}
-				else if (*Character == TEXT('(') || *Character == TEXT(')') || *Character == TEXT('[') ||
+				else if (*Character == TEXT('+') || *Character == TEXT('-') || *Character == TEXT('*') ||
+						 *Character == TEXT('/') || *Character == TEXT('%') ||
+						 *Character == TEXT('(') ||
+						 *Character == TEXT('[') ||
 						 *Character == TEXT(']'))
 				{
 					Outtext(X + 2, Y, *Character, MurseOnly);
 
 					X += textwidth(*Character) + WordSpacing + 4;
+				}
+				else if (*Character == TEXT(')'))
+				{
+					Outtext(X, Y, *Character, MurseOnly);
+
+					X += textwidth(*Character) + WordSpacing + 2;
 				}
 				else if (*Character == TEXT('.'))
 				{
