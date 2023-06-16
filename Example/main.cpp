@@ -15,7 +15,7 @@ int main()
 	Renderer.Rendering(TEXT(
 						   R"(
 \begin{align}
-Base Line 我们构造一个蒙特卡洛积分（Monte\quard Carlo\quard Integration）： \\
+Base Line 我们构造一个蒙特卡洛积分（Monte\quad Carlo\quad Integration）： \\
 F_{N}=\frac{b-a}{N}\sum^{N}_{i=1}f(X_{i}) \\
 其中地每一个 X_{i}(i=1,2,3,...,N) 为 [a,b] 之间的均匀连续随机变量。\\
 其实 F_{N} 的数学期望即为积分结果 \Alpha E[F_{N}]=E[\frac{b-a}{N}\sum^{N}_{i=1}f(X_{i})] \\
