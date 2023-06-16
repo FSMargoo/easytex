@@ -183,7 +183,7 @@ int TexRender::RenderingTex(const TexString &TeXString, size_t X, size_t Y, IMAG
 	TexFont OldFont;
 	TexFont ChineseFont(TextHeight, TextColor, this->ChineseFont);
 	TexFont EnglishFont(TextHeight, TextColor, this->EnglishFont);
-	TexFont MathFont(TextHeight, TextColor, TEXT("Times New Roman"));
+	TexFont MathFont(TextHeight, TextColor, this->EnglishFont);
 
 	MathFont.Font.lfItalic = true;
 
@@ -277,7 +277,7 @@ int TexRender::RenderingTex(const TexString &TeXString, size_t X, size_t Y, IMAG
 
 				TextHeight = TextHeightBackup;
 
-				LineTop = min(LineTop, -TextHeight * 0.2);
+				LineTop = min(LineTop, -TextHeight * 0.3);
 
 				continue;
 			}
@@ -347,14 +347,16 @@ int TexRender::RenderingTex(const TexString &TeXString, size_t X, size_t Y, IMAG
 					++Character;
 					TexString Denominator = FetchAgrument(Character);
 
-					int MolecularWidth	 = RenderingTex(Molecular, 0, 0, nullptr, true);
-					int DenominatorWidth = RenderingTex(Denominator, 0, 0, nullptr, true);
+					int TopTop			 = 0;
+					int BottomTop		 = 0;
+					int MolecularWidth	 = RenderingTex(Molecular, 0, 0, nullptr, true, &TopTop);
+					int DenominatorWidth = RenderingTex(Denominator, 0, 0, nullptr, true, &BottomTop);
 					int Width			 = max(MolecularWidth, DenominatorWidth);
 
 					RenderingTex(Molecular, X + (Width / 2 - MolecularWidth / 2), Y - TextHeight / 2, TargetDevice,
 								 MurseOnly);
-					RenderingTex(Denominator, X + (Width / 2 - DenominatorWidth / 2), Y + TextHeight / 2, TargetDevice,
-								 MurseOnly);
+					RenderingTex(Denominator, X + (Width / 2 - DenominatorWidth / 2), Y + TextHeight / 2 - BottomTop,
+								 TargetDevice, MurseOnly);
 
 					if (!MurseOnly)
 					{
@@ -364,7 +366,8 @@ int TexRender::RenderingTex(const TexString &TeXString, size_t X, size_t Y, IMAG
 
 					X += Width + 5;
 
-					LineTop = min(LineTop, -TextHeight / 2);
+					LineTop	   = min(LineTop, -TextHeight * 0.75 + TopTop);
+					LineHeight = max(LineHeight, TextHeight - BottomTop);
 
 					continue;
 				}
@@ -432,8 +435,8 @@ int TexRender::RenderingTex(const TexString &TeXString, size_t X, size_t Y, IMAG
 
 						if (!MurseOnly)
 						{
-							TexPainter::DrawSqrt(SqrtX, Y + Top + 2, Width + textwidth(TEXT('√')) + 2,
-												 TextHeight - Top);
+							TexPainter::DrawSqrt(SqrtX, Y + Top, Width + textwidth(TEXT('√')) + 2,
+												 TextHeight - Top + 2);
 						}
 
 						LineTop = min(LineTop, -TextHeight * 0.2);
@@ -461,14 +464,16 @@ int TexRender::RenderingTex(const TexString &TeXString, size_t X, size_t Y, IMAG
 
 						if (!MurseOnly)
 						{
-							TexPainter::DrawSqrt(SqrtX, Y + Top + 2, Width + textwidth(TEXT('√')) + 2,
-												 TextHeight - Top);
+							TexPainter::DrawSqrt(SqrtX, Y + Top, Width + textwidth(TEXT('√')) + 2,
+												 TextHeight - Top + 2);
 						}
 
 						LineTop = min(LineTop, -TextHeight * 0.2);
 
 						X += Width + 2;
 					}
+
+					LineTop = min(LineTop, -6);
 				}
 				if (Function == TEXT("sum"))
 				{
@@ -762,6 +767,10 @@ int TexRender::RenderingTex(const TexString &TeXString, size_t X, size_t Y, IMAG
 				{
 					TEX_OUT_GREEK('∞');
 				}
+				if (Function == TEXT("pm"))
+				{
+					TEX_OUT_GREEK('±');
+				}
 				if (Function == TEXT("int"))
 				{
 					TexFont OldFont;
@@ -908,6 +917,14 @@ int TexRender::RenderingTex(const TexString &TeXString, size_t X, size_t Y, IMAG
 			}
 			else
 			{
+				if (this->EnglishFont == TEXT("Times New Roman") && *Character == TEXT('f'))
+				{
+					Outtext(X + 6, Y, *Character, MurseOnly);
+
+					X += textwidth(*Character) + WordSpacing + 7;
+
+					continue;
+				}
 				if (InPrint)
 				{
 					X += 3;
@@ -932,9 +949,18 @@ int TexRender::RenderingTex(const TexString &TeXString, size_t X, size_t Y, IMAG
 		}
 		else
 		{
-			Outtext(X, Y, *Character, MurseOnly);
+			if (*Character == TEXT('='))
+			{
+				Outtext(X + 4, Y, *Character, MurseOnly);
 
-			X += textwidth(*Character) + WordSpacing;
+				X += textwidth(*Character) + WordSpacing + 8;
+			}
+			else
+			{
+				Outtext(X, Y, *Character, MurseOnly);
+
+				X += textwidth(*Character) + WordSpacing;
+			}
 		}
 
 		if (Character == TeXString.end())
@@ -972,6 +998,26 @@ TexString TexRender::FetchId(TexString::const_iterator &Iterator, const TexStrin
 }
 TexString TexRender::FetchAgrument(TexString::const_iterator &Iterator)
 {
+	while (*Iterator == TEXT(' ') || *Iterator == TEXT('\t'))
+	{
+		++Iterator;
+	}
+	if (*Iterator >= TEXT('0') && *Iterator <= TEXT('9'))
+	{
+		TexString Number;
+		for (;; ++Iterator)
+		{
+			if (!(*Iterator >= TEXT('0') && *Iterator <= TEXT('9')))
+			{
+				--Iterator;
+				return Number;
+			}
+
+			Number.push_back(*Iterator);
+		}
+
+		return Number;
+	}
 	if (*Iterator == TEXT('{'))
 	{
 		++Iterator;
