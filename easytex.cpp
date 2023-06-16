@@ -465,7 +465,7 @@ int TexRender::RenderingTex(const TexString &TeXString, size_t X, size_t Y, IMAG
 												 TextHeight - Top + 2);
 						}
 
-						LineTop = min(LineTop, -TextHeight * 0.2 + Top);
+						LineTop = min(LineTop, -TextHeight * 0.4 + Top);
 
 						X += Width + 2;
 					}
@@ -494,7 +494,7 @@ int TexRender::RenderingTex(const TexString &TeXString, size_t X, size_t Y, IMAG
 												 TextHeight - Top + 2);
 						}
 
-						LineTop = min(LineTop, -TextHeight * 0.2 + Top);
+						LineTop = min(LineTop, -TextHeight * 0.4 + Top);
 
 						X += Width + 2;
 					}
